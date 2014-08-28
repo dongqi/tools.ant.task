@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- ====================================================================== 
+     2014年8月28日 下午3:11:02                                                        
+
+     project    
+     description
+                   
+     dongqi                                                                
+     ====================================================================== -->
+<project name="project" default="default">
+	<description>
+            description
+    </description>
+
+	<!-- ================================= 
+          target: default              
+         ================================= -->
+	<target name="default" depends="depends" description="description">
+
+	</target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: depends                      
+         - - - - - - - - - - - - - - - - - -->
+	<target name="depends">
+		<sftp message="SFTP文件上传" username="" password="" port="" host="" destDir="">
+			<fileset dir="">
+				<include name="" />
+			</fileset>
+		</sftp>
+	</target>
+
+	<taskdef name="sftp" classname="cn.eastseven.tools.ant.task.SFTPTask" />
+
+</project>
