@@ -1,7 +1,8 @@
 package cn.eastseven.tools.ant.task;
 
-import java.io.File;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.Vector;
 
 import org.apache.tools.ant.BuildException;
@@ -50,40 +51,43 @@ public class SFTPTask extends Task {
 		session.setPassword(password);
 		session.setTimeout(30000);
 		session.connect();
-
+		
 		Channel channel = (Channel) session.openChannel("sftp");
 		channel.connect(1000);
 		ChannelSftp sftp = (ChannelSftp) channel;
-
-		String[] includedFiles = null;
+		
+		Set<String> includedFiles = new HashSet<String>();
 		String dir = "";
-		for (Iterator<FileSet> iterator = filesets.iterator(); iterator.hasNext();) {
-			FileSet fs = iterator.next();
-			DirectoryScanner ds = fs.getDirectoryScanner(getProject());
-			includedFiles = ds.getIncludedFiles();
-			dir = fs.getDir().getAbsolutePath();
-		}
+	    for (Iterator<FileSet> iterator = filesets.iterator(); iterator.hasNext();) {
+	        FileSet fs = iterator.next();
+	        DirectoryScanner ds = fs.getDirectoryScanner(getProject());
+	        String[] _includedFiles = ds.getIncludedFiles();
+	        dir = fs.getDir().getAbsolutePath();
+	        for(String filename : _includedFiles) {
+	        	includedFiles.add(dir+"/"+filename);
+	        }
+	    }
 
-		for (String filename : includedFiles) {
-			File file = new File(dir + "/" + filename);
-			System.out.println("上传开始: " + filename);
-
-			String src = file.getAbsolutePath();
-			String dst = destDir + "/" + filename;
-
+	    for (String absolutePath : includedFiles) {
+			String filename = absolutePath.substring(absolutePath.lastIndexOf("/"));
+			
+			String src = absolutePath;
+			String dst = destDir+"/"+filename;
+			
+			System.out.println("上传开始: src=" + absolutePath+", dst="+dst);
 			try {
 				sftp.put(src, dst, ChannelSftp.OVERWRITE);
 			} catch (SftpException e) {
 				e.printStackTrace();
 			}
-
+			
 			System.out.println("上传完成");
 		}
-
-		channel.disconnect();
+	    
+	    channel.disconnect();
 		session.disconnect();
 		System.out.println("关闭上传连接");
-
+	    
 	}
 
 	// ----- setter method
